@@ -1,0 +1,8 @@
+# Interfaz grafica de la aplicacion (app.py). detector.py no la necesita.
+PySide6>=6.6
+
+# El modulo dnn de YOLO vive en opencv-python.
+# NO usar opencv-python-headless: la app abre una ventana y necesita GUI.
+opencv-python>=4.8
+
+numpy>=1.24

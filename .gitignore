@@ -1,1 +1,16 @@
+# Pesos del modelo: ~250 MB, se descarga a mano (ver README).
 yolov4.weights
+
+# Base de datos local de sesiones, objetos e historial.
+detector.db
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Windows
+desktop.ini
+Thumbs.db

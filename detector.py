@@ -71,12 +71,40 @@ def detect_objects(frame, net, output_layers, conf_threshold, nms_threshold):
     idxs = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
     return [(boxes[i], class_ids[i], confidences[i]) for i in idxs.flatten()]
 
+def dibujar_objetos(frame, objetos, escala=1.0):
+    """Dibuja en el frame los objetos ya armados para mostrar.
+
+    Es la función genérica: la app arma cada objeto con su propio color, su
+    nombre visible y la hora de primera detección. `objetos` es una lista de
+    diccionarios con:
+        {"caja": [x, y, w, h], "texto": str, "subtexto": str, "color": (b, g, r)}
+    `escala` agranda la tipografía junto con el tamaño del video.
+    """
+    grosor = max(2, int(round(2 * escala)))
+    fuente = max(0.4, 0.5 * escala)
+    for obj in objetos:
+        x, y, w, h = obj["caja"]
+        color = obj["color"]
+        cv2.rectangle(frame, (x, y), (x + w, y + h), color, grosor)
+
+        texto = obj.get("texto", "")
+        subtexto = obj.get("subtexto", "")
+        # dy arranca arriba de la caja y sube si hay lineas adicionales
+        dy = int(round(22 * escala))
+        if texto:
+            cv2.putText(frame, texto, (x, y - dy), cv2.FONT_HERSHEY_SIMPLEX,
+                        fuente, color, grosor)
+            dy += int(round(20 * escala))
+        if subtexto:
+            cv2.putText(frame, subtexto, (x, y - dy), cv2.FONT_HERSHEY_SIMPLEX,
+                        fuente * 0.85, color, max(1, grosor - 1))
+
 def draw_labels(frame, detections, classes):
     # Define categoría animales
     animals = {"cat","dog","bird","horse","sheep","cow",
                "elephant","bear","zebra","giraffe"}
+    objetos = []
     for (box, class_id, conf) in detections:
-        x,y,w,h = box
         label = classes[class_id]
         # Elige color
         if label == "person":
@@ -85,10 +113,9 @@ def draw_labels(frame, detections, classes):
             color = (255,0,0)
         else:
             color = (0,0,255)
-        cv2.rectangle(frame, (x,y), (x+w,y+h), color, 2)
-        texto = f"{label}: {conf:.2f}"
-        cv2.putText(frame, texto, (x, y-10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        objetos.append({"caja": box, "texto": f"{label}: {conf:.2f}",
+                        "subtexto": "", "color": color})
+    dibujar_objetos(frame, objetos)
 
 # --- MAIN ---------------------------------------------------
 
